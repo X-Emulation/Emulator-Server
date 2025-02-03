@@ -5,6 +5,7 @@ interface Rom {
   name: string
   size: number
   path: string
+  lastModified?: number
 }
 
 interface RecentRom extends Rom {
@@ -31,12 +32,14 @@ const loadRoms = async (): Promise<void> => {
   try {
     const response = await fetch('http://localhost:1248/api/roms')
     if (!response.ok) throw new Error('Failed to fetch ROMs')
-    const loadedRoms = await response.json()
-    roms.value = loadedRoms
+    const result = await response.json()
+    if (!result.success) throw new Error(result.error || 'Failed to load ROMs')
+    
+    roms.value = result.data
     
     // Update recent roms
     const currentTime = Date.now()
-    recentRoms.value = loadedRoms
+    recentRoms.value = result.data
       .map((rom: Rom) => ({ ...rom, addedAt: currentTime }))
       .sort((a: RecentRom, b: RecentRom) => b.addedAt - a.addedAt)
       .slice(0, MAX_RECENT_ROMS)
