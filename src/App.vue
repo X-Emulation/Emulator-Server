@@ -7,14 +7,20 @@ interface Rom {
   path: string
 }
 
+interface RecentRom extends Rom {
+  addedAt: number
+}
+
 const currentTab = ref('dashboard')
 const roms = ref<Rom[]>([])
+const recentRoms = ref<RecentRom[]>([])
 const loading = ref(false)
 const error = ref('')
+const MAX_RECENT_ROMS = 5
 
 const switchTab = (tab: string): void => {
   currentTab.value = tab
-  if (tab === 'roms') {
+  if (tab === 'roms' || tab === 'dashboard') {
     void loadRoms()
   }
 }
@@ -23,9 +29,17 @@ const loadRoms = async (): Promise<void> => {
   loading.value = true
   error.value = ''
   try {
-    const response = await fetch('http://localhost:5174/api/roms')
+    const response = await fetch('http://localhost:1248/api/roms')
     if (!response.ok) throw new Error('Failed to fetch ROMs')
-    roms.value = await response.json()
+    const loadedRoms = await response.json()
+    roms.value = loadedRoms
+    
+    // Update recent roms
+    const currentTime = Date.now()
+    recentRoms.value = loadedRoms
+      .map((rom: Rom) => ({ ...rom, addedAt: currentTime }))
+      .sort((a: RecentRom, b: RecentRom) => b.addedAt - a.addedAt)
+      .slice(0, MAX_RECENT_ROMS)
   } catch (e) {
     error.value = e instanceof Error ? e.message : 'Failed to load ROMs'
   } finally {
@@ -34,7 +48,7 @@ const loadRoms = async (): Promise<void> => {
 }
 
 onMounted(() => {
-  if (currentTab.value === 'roms') {
+  if (currentTab.value === 'roms' || currentTab.value === 'dashboard') {
     void loadRoms()
   }
 })
@@ -64,7 +78,26 @@ onMounted(() => {
       <div class="content-area">
         <div v-if="currentTab === 'dashboard'">
           <h2>Dashboard</h2>
-          <p>Welcome to EmulatorX Dashboard</p>
+          <div class="dashboard-content">
+            <div class="welcome-section">
+              <p>Welcome to EmulatorX Dashboard</p>
+            </div>
+            
+            <div class="recent-games">
+              <h3>Recently Added Games</h3>
+              <div v-if="recentRoms.length > 0" class="recent-roms-slider">
+                <div class="slider-container">
+                  <div v-for="rom in recentRoms" :key="rom.path" class="recent-rom-card">
+                    <div class="rom-info">
+                      <span class="rom-name">{{ rom.name }}</span>
+                      <span class="rom-size">{{ (rom.size / 1024 / 1024).toFixed(2) }} MB</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <p v-else class="no-roms">No games added yet.</p>
+            </div>
+          </div>
         </div>
         
         <div v-if="currentTab === 'roms'" class="roms-section">
@@ -246,6 +279,98 @@ p {
 
 .error {
   color: #ef4444;
+}
+
+.dashboard-content {
+  display: grid;
+  gap: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.welcome-section {
+  background: var(--color-background-soft);
+  padding: 2rem;
+  border-radius: 8px;
+  border: 1px solid var(--color-border);
+}
+
+.recent-games {
+  background: var(--color-background-soft);
+  padding: 2rem;
+  border-radius: 8px;
+  border: 1px solid var(--color-border);
+  overflow: hidden;
+}
+
+h3 {
+  font-size: 1.5rem;
+  color: var(--color-heading);
+  margin-bottom: 1rem;
+}
+
+.recent-roms-slider {
+  margin: 0 -1rem;
+  padding: 0 1rem;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+}
+
+.recent-roms-slider::-webkit-scrollbar {
+  height: 8px;
+}
+
+.recent-roms-slider::-webkit-scrollbar-track {
+  background: var(--color-background);
+  border-radius: 4px;
+}
+
+.recent-roms-slider::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 4px;
+}
+
+.slider-container {
+  display: flex;
+  gap: 1rem;
+  padding: 0.5rem 0;
+  min-width: min-content;
+}
+
+.recent-rom-card {
+  flex: 0 0 200px;
+  background: var(--color-background);
+  border-radius: 8px;
+  border: 1px solid var(--color-border);
+  overflow: hidden;
+  transition: transform 0.2s, border-color 0.2s;
+}
+
+.recent-rom-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--color-border-hover);
+}
+
+.rom-info {
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.rom-name {
+  font-size: 1rem;
+  color: var(--color-heading);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.rom-size {
+  font-size: 0.9rem;
+  color: var(--color-text);
+  opacity: 0.8;
 }
 </style>
 

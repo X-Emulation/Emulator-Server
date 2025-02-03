@@ -26,10 +26,10 @@ export default defineConfig({
     }
   },
   server: {
-    port: 5174,
+    port: 1248,
     proxy: {
       '/api/roms': {
-        target: 'http://localhost:5174',
+        target: 'http://localhost:1248',
         bypass: (req: IncomingMessage, res: ServerResponse<IncomingMessage> | undefined, options: ProxyOptions) => {
           if (!res) return
           res.setHeader('Content-Type', 'application/json')

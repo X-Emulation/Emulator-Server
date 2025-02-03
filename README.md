@@ -1,38 +1,48 @@
-<<<<<<< HEAD
-# Emulator-Server
-An optional service of EmulatorX
-=======
-# emulatorx-server
+# EmulatorX-Server
 
-This template should help get you started developing with Vue 3 in Vite.
+EmulatorX-Server is an optional ROM management server that allows you to organize, store, and download ROMs for your emulators. It is designed to work seamlessly with emulator frontends, providing a centralized location for your game collection.
 
-## Recommended IDE Setup
+## Features
 
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+- Centralized ROM storage and management
+- API for downloading ROMs
+- Optional usage—works only if enabled
+- Lightweight and easy to set up
 
-## Type Support for `.vue` Imports in TS
+## Installation
 
-TypeScript cannot handle type information for `.vue` imports by default, so we replace the `tsc` CLI with `vue-tsc` for type checking. In editors, we need [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) to make the TypeScript language service aware of `.vue` types.
+1. Clone the repository:
+   ```sh
+   git clone https://github.com/X-Emulator/EmulatorX-Server.git
+   ```
+2. Navigate to the project folder:
+   ```sh
+   cd EmulatorX-Server
+   ```
+3. Install dependencies:
+   ```sh
+   yarn
+   ```
+4. Start the server:
+   ```sh
+   yarn dev
+   ```
 
-## Customize configuration
+## Usage
 
-See [Vite Configuration Reference](https://vite.dev/config/).
-
-## Project Setup
-
-```sh
-yarn
+Once the server is running, you can access it via:
+```
+http://localhost:1248
 ```
 
-### Compile and Hot-Reload for Development
+## Optional Usage
 
-```sh
-yarn dev
-```
+EmulatorX-Server is completely optional. If you prefer to manage ROMs manually, you can disable server integration in your emulator frontend. The system is designed to work with or without it.
 
-### Type-Check, Compile and Minify for Production
+## License
 
-```sh
-yarn build
-```
->>>>>>> 8d0e4a4 (Initial)
+This project is licensed under the MIT License.
+
+---
+
+Feel free to contribute or suggest improvements!
