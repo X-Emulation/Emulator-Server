@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || window.location.origin
+
 interface Rom {
   name: string
   size: number
@@ -30,7 +32,7 @@ const loadRoms = async (): Promise<void> => {
   loading.value = true
   error.value = ''
   try {
-    const response = await fetch('http://localhost:1248/api/roms')
+    const response = await fetch(`${API_BASE_URL}/api/roms`)
     if (!response.ok) throw new Error('Failed to fetch ROMs')
     const result = await response.json()
     if (!result.success) throw new Error(result.error || 'Failed to load ROMs')

@@ -27,11 +27,19 @@ export default defineConfig({
   },
   server: {
     port: 1248,
+    host: true,
+    cors: true,
     proxy: {
       '/api/roms': {
         target: 'http://localhost:1248',
+        changeOrigin: true,
         bypass: (req: IncomingMessage, res: ServerResponse<IncomingMessage> | undefined, options: ProxyOptions) => {
           if (!res) return
+
+          // Add CORS headers
+          res.setHeader('Access-Control-Allow-Origin', '*')
+          res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+          res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
 
           // Handle ROM downloads
           if (req.url?.startsWith('/api/roms/download/')) {
