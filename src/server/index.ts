@@ -94,45 +94,29 @@ const downloadRom: RequestHandler<DownloadParams> = async (req, res) => {
       return
     }
 
-    // Get file stats for Content-Length
-    const stats = fs.statSync(filePath)
-
-    // Set download headers
+    // Set headers for binary file download
     res.setHeader('Content-Type', 'application/octet-stream')
     res.setHeader('Content-Disposition', `attachment; filename="${encodeURIComponent(filename)}"`)
-    res.setHeader('Content-Length', stats.size)
-    res.setHeader('Cache-Control', 'no-cache')
-    res.setHeader('Accept-Ranges', 'bytes')
-
-    // Create read stream and pipe to response
-    const fileStream = fs.createReadStream(filePath)
+    res.setHeader('Content-Length', fs.statSync(filePath).size)
     
-    // Handle stream errors
-    fileStream.on('error', (error) => {
-      console.error(`Error streaming file ${filename}:`, error)
-      if (!res.headersSent) {
-        res.status(500).json({
-          success: false,
-          error: 'Failed to stream ROM file',
-          details: error instanceof Error ? error.message : 'Unknown error'
-        })
-      }
-    })
-
-    // Handle client disconnect
-    req.on('close', () => {
-      fileStream.destroy()
-    })
-
-    // Stream the file
-    fileStream.pipe(res)
+    // Stream the raw file without any transformations
+    fs.createReadStream(filePath)
+      .on('error', (error) => {
+        console.error(`Error streaming file ${filename}:`, error)
+        if (!res.headersSent) {
+          res.status(500).json({
+            success: false,
+            error: 'Failed to stream ROM file'
+          })
+        }
+      })
+      .pipe(res)
   } catch (error) {
     console.error(`Error processing download for ${req.params.filename}:`, error)
     if (!res.headersSent) {
       res.status(500).json({
         success: false,
-        error: 'Failed to process download request',
-        details: error instanceof Error ? error.message : 'Unknown error'
+        error: 'Failed to process download request'
       })
     }
   }
